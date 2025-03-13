@@ -1489,7 +1489,7 @@ type VoucherOrder struct {
 	UseTime    string `thrift:"useTime,8" gorm:"column:use_time" form:"useTime" json:"useTime" query:"useTime"`
 	RefundTime string `thrift:"refundTime,9" gorm:"column:refund_time" form:"refundTime" json:"refundTime" query:"refundTime"`
 	UpdateTime string `thrift:"updateTime,10" gorm:"column:update_time;default:CURRENT_TIMESTAMP;autoUpdateTime" form:"updateTime" json:"updateTime" query:"updateTime"`
-	OrderId    int64  `thrift:"orderId,11" gorm:"column:order_id" form:"orderId" json:"orderId" query:"orderId"`
+	// OrderId    int64  `thrift:"orderId,11" gorm:"column:order_id" form:"orderId" json:"orderId" query:"orderId"`
 }
 
 func NewVoucherOrder() *VoucherOrder {
@@ -1539,9 +1539,7 @@ func (p *VoucherOrder) GetUpdateTime() (v string) {
 	return p.UpdateTime
 }
 
-func (p *VoucherOrder) GetOrderId() (v int64) {
-	return p.OrderId
-}
+
 
 var fieldIDToName_VoucherOrder = map[int16]string{
 	1:  "id",
@@ -1656,14 +1654,14 @@ func (p *VoucherOrder) Read(iprot thrift.TProtocol) (err error) {
 			} else if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
 			}
-		case 11:
-			if fieldTypeId == thrift.I64 {
-				if err = p.ReadField11(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else if err = iprot.Skip(fieldTypeId); err != nil {
-				goto SkipFieldError
-			}
+		// case 11:
+		// 	if fieldTypeId == thrift.I64 {
+		// 		if err = p.ReadField11(iprot); err != nil {
+		// 			goto ReadFieldError
+		// 		}
+		// 	} else if err = iprot.Skip(fieldTypeId); err != nil {
+		// 		goto SkipFieldError
+		// 	}
 		default:
 			if err = iprot.Skip(fieldTypeId); err != nil {
 				goto SkipFieldError
@@ -1803,17 +1801,7 @@ func (p *VoucherOrder) ReadField10(iprot thrift.TProtocol) error {
 	p.UpdateTime = _field
 	return nil
 }
-func (p *VoucherOrder) ReadField11(iprot thrift.TProtocol) error {
 
-	var _field int64
-	if v, err := iprot.ReadI64(); err != nil {
-		return err
-	} else {
-		_field = v
-	}
-	p.OrderId = _field
-	return nil
-}
 
 func (p *VoucherOrder) Write(oprot thrift.TProtocol) (err error) {
 
@@ -2058,9 +2046,9 @@ func (p *VoucherOrder) writeField11(oprot thrift.TProtocol) (err error) {
 	if err = oprot.WriteFieldBegin("orderId", thrift.I64, 11); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.OrderId); err != nil {
-		return err
-	}
+	// if err := oprot.WriteI64(p.OrderId); err != nil {
+	// 	return err
+	// }
 	if err = oprot.WriteFieldEnd(); err != nil {
 		goto WriteFieldEndError
 	}

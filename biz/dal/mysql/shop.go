@@ -9,7 +9,6 @@ import (
 	"xzdp/biz/model/shop"
 	"xzdp/biz/pkg/constants"
 
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	redis2 "github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
@@ -138,7 +137,6 @@ func queryByID2(ctx context.Context, id int64) (*shop.Shop, error) {
 }
 
 func LoadShopListToCache(ctx context.Context) error {
-	hlog.Info("LoadShopListToRedis")
 	shopMap := make(map[int64][]shop.Shop)
 	var shops []*shop.Shop
 	err := DB.Find(&shops).Error

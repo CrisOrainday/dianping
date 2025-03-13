@@ -36,16 +36,14 @@ func ShopList(ctx context.Context, c *app.RequestContext) {
 // @router /shop/of/type [GET]
 func ShopOfType(ctx context.Context, c *app.RequestContext) {
 	var err error
-	// var req shop.ShopOfTypeReq
-	var req shop.ShopOfTypeGeoReq
+	var req shop.ShopOfTypeReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		utils.SendErrResponse(ctx, c, consts.StatusOK, err)
 		return
 	}
 
-	// resp, err := service.NewShopOfTypeService(ctx, c).Run(&req)
-	resp, err := service.NewShopOfTypeGeoService(ctx, c).Run(&req)
+	resp, err := service.NewShopOfTypeService(ctx, c).Run(&req)
 
 	if err != nil {
 		utils.SendErrResponse(ctx, c, consts.StatusOK, err)

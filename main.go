@@ -6,6 +6,7 @@ import (
 	"context"
 	"xzdp/biz/dal/mysql"
 	"xzdp/biz/dal/redis"
+	voucher "xzdp/biz/service/voucher"
 	"xzdp/biz/middleware/interceptor"
 	"xzdp/conf"
 
@@ -18,6 +19,22 @@ import (
 )
 
 func main() {
+	// 初始化RabbitMQ连接
+	conn, err := voucher.InitRabbitMQ()
+    if err != nil {
+        hlog.Fatalf("RabbitMQ初始化失败: %v", err)
+    }
+	seckillService := &voucher.SeckillVoucherService{
+        RequestContext: nil, // 如果没有实际的RequestContext，可以传递nil
+        Context:        context.Background(), // 使用context.Background()初始化
+    }
+
+    // 创建消费者（启动 10 个 worker）
+    consumer := voucher.NewSeckillConsumer(seckillService, conn, 10)
+    consumer.Start()
+	hlog.Info("启动消息监听")
+	//========================================================
+
 	go func() {
 		_ = http.ListenAndServe(":6060", nil)
 	}()
@@ -38,6 +55,15 @@ func main() {
 		"/blog",
 	}
 
+	// excludedPaths := map[string]bool{
+	// 	"/shop":           true,
+	// 	"/voucher":        true,
+	// 	"/shop-type/list": true,
+	// 	"/upload":         true,
+	// 	"/blog/hot":       true,
+	// 	"/user/code":      true,
+	// 	"/user/login":     true,
+	// }
 	h.Use(func(ctx context.Context, c *app.RequestContext) {
 		path := string(c.Request.Path())
 		for i := 0; i < len(excludedPaths); i++ {

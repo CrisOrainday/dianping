@@ -39,27 +39,16 @@ func QueryVoucherOrderByVoucherID(ctx context.Context, userId int64, id int64) e
 	return nil
 }
 
-func UpdateVoucherStock(ctx context.Context, tx *gorm.DB, id int64) error {
-	// result := DB.WithContext(ctx).Model(&voucher.SeckillVoucher{}).
-	// 	Where("voucher_id = ? and stock > 0", id).
-	// 	Update("stock", gorm.Expr("stock - ?", 1))
-	// if result.RowsAffected == 0 {
-	// 	return errors.New("库存不足，扣减失败")
-	// }
-	// return result.Error
-	result := tx.WithContext(ctx).Model(&voucher.SeckillVoucher{}).
-        Where("voucher_id = ? AND stock > 0", id).
-        Update("stock", gorm.Expr("stock - 1"))
-
-    if result.Error != nil {
-        return result.Error
-    }
-    if result.RowsAffected == 0 {
-        return errors.New("库存不足，扣减失败") 
-    }
-    return nil
+func UpdateVoucherStock(ctx context.Context, id int64) error {
+	result := DB.WithContext(ctx).Model(&voucher.SeckillVoucher{}).
+		Where("voucher_id = ? and stock > 0", id).
+		Update("stock", gorm.Expr("stock - ?", 1))
+	if result.RowsAffected == 0 {
+		return errors.New("库存不足，扣减失败")
+	}
+	return result.Error
 }
 
-func CreateVoucherOrder(ctx context.Context, tx *gorm.DB, voucherOrder *voucher.VoucherOrder) error {
-	return tx.WithContext(ctx).Create(voucherOrder).Error
+func CreateVoucherOrder(ctx context.Context, voucherOrder *voucher.VoucherOrder) error {
+	return DB.WithContext(ctx).Create(voucherOrder).Error
 }
