@@ -39,7 +39,7 @@ func (h *UserSignService) Run(req *user.Empty) (resp *bool, err error) {
 	keySuffix := now.Format(":200601")
 	key := constants.USER_SIGN_KEY + fmt.Sprint(userId) + keySuffix
 	dayOfMonth := now.Day()
-	err = redis.RedisClient.SetBit(h.Context, key, int64(dayOfMonth-1), 1).Err()
+	err = redis.MasterRedisClient.SetBit(h.Context, key, int64(dayOfMonth-1), 1).Err()
 	if err != nil {
 		return nil, err
 	}

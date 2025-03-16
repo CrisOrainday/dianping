@@ -11,7 +11,7 @@ func NextId(ctx context.Context, prefix string) (int64, error) {
 	now := time.Now().Unix()
 	timeStamp := now - beginTimeStamp
 	dateKey := time.Unix(now, 0).Format("2006-01-02")
-	count, err := RedisClient.Incr(ctx, constants.ICRID_KEY+prefix+":"+dateKey).Result()
+	count, err := MasterRedisClient.Incr(ctx, constants.ICRID_KEY+prefix+":"+dateKey).Result()
 	if err != nil {
 		return 0, err
 	}

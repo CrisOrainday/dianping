@@ -13,7 +13,7 @@ import (
 )
 
 func GetShopFromCache(ctx context.Context, key string) (*shop.Shop, error) {
-	shopJson, err := RedisClient.Get(ctx, key).Result()
+	shopJson, err := SlaveRedisClient.Get(ctx, key).Result()
 	if err == nil && shopJson != "" {
 		var shop shop.Shop
 		if err := json.Unmarshal([]byte(shopJson), &shop); err != nil {
@@ -45,7 +45,7 @@ func QueryShopWithDistance(ctx context.Context, req *shop.ShopOfTypeGeoReq) (res
 		Sort:     "ASC",
 		Count:    int(end),
 	}
-	locations, err := RedisClient.GeoRadius(ctx, key, req.Longitude, req.Latitude, &geoRadiusQuery).Result()
+	locations, err := SlaveRedisClient.GeoRadius(ctx, key, req.Longitude, req.Latitude, &geoRadiusQuery).Result()
 
 	if err != nil {
 		fmt.Printf("Error querying Redis: %v\n", err)

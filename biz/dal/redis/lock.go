@@ -24,7 +24,7 @@ func NewLock(ctx context.Context, key string, value string, expire time.Duration
 
 func (l *Lock) TryLock() bool {
 	// value 应当全局唯一
-	success, err := RedisClient.SetNX(l.Ctx, l.Key, l.Value, l.Expire).Result()
+	success, err := MasterRedisClient.SetNX(l.Ctx, l.Key, l.Value, l.Expire).Result()
 	if err != nil {
 		log.Printf("Error acquiring lock: %v", err)
 		return false
@@ -39,5 +39,5 @@ func (l *Lock) UnLock(value string) {
         end
 		return 0
     `
-	RedisClient.Eval(l.Ctx, luaScript, []string{l.Key}, value)
+	MasterRedisClient.Eval(l.Ctx, luaScript, []string{l.Key}, value)
 }

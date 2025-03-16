@@ -33,7 +33,7 @@ func (h *CommonFollowService) Run(targetUserID string) (resp *follow.CommonFollo
 	user := utils.GetUser(h.Context).GetID()
 	key1 := constants.FOLLOW_USER_KEY + strconv.FormatInt(user, 10)
 	key2 := constants.FOLLOW_USER_KEY + targetUserID
-	arr, err := redis.RedisClient.SInter(h.Context, key1, key2).Result()
+	arr, err := redis.SlaveRedisClient.SInter(h.Context, key1, key2).Result()
 	if err != nil {
 		return nil, err
 	}

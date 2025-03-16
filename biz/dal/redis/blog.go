@@ -8,7 +8,7 @@ import (
 )
 
 func IsLiked(ctx context.Context, key string, member string) (ok bool, err error) {
-	_, err = RedisClient.ZScore(ctx, key, member).Result()
+	_, err = SlaveRedisClient.ZScore(ctx, key, member).Result()
 	if err != nil {
 		if errors.Is(err, redis2.Nil) {
 			return false, nil
@@ -19,7 +19,7 @@ func IsLiked(ctx context.Context, key string, member string) (ok bool, err error
 }
 
 func HasLikes(ctx context.Context, key string) (bool, error) {
-	exists, err := RedisClient.Exists(ctx, key).Result()
+	exists, err := SlaveRedisClient.Exists(ctx, key).Result()
 	if err != nil {
 		return false, err
 	}
@@ -27,7 +27,7 @@ func HasLikes(ctx context.Context, key string) (bool, error) {
 }
 
 func DeleteLikes(ctx context.Context, key string) error {
-	err := RedisClient.Del(ctx, key).Err()
+	err := MasterRedisClient.Del(ctx, key).Err()
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func DeleteLikes(ctx context.Context, key string) error {
 
 func GetBlogsByKey(ctx context.Context, key string, max string, offset int64) ([]redis2.Z, error) {
 	size := constants.MAX_PAGE_SIZE
-	result, err := RedisClient.ZRevRangeByScoreWithScores(
+	result, err := SlaveRedisClient.ZRevRangeByScoreWithScores(
 		ctx,
 		key,
 		&redis2.ZRangeBy{Max: max, Min: "0", Offset: offset, Count: int64(size)},

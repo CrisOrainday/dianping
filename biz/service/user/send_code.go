@@ -38,7 +38,7 @@ func (h *SendCodeService) Run(req *user.UserLoginFrom) (resp *user.Result, err e
 	}
 
 	code := utils.GenerateDigits(6)
-	err = redis.RedisClient.Set(h.Context, constants.LOGIN_CODE_KEY+phone, code, constants.LOGIN_CODE_EXPIRE*time.Second).Err() // add expiration
+	err = redis.MasterRedisClient.Set(h.Context, constants.LOGIN_CODE_KEY+phone, code, constants.LOGIN_CODE_EXPIRE*time.Second).Err() // add expiration
 	if err != nil {
 		hlog.CtxErrorf(h.Context, "err = %s", err.Error())
 		return nil, err

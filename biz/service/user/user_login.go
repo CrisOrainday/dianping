@@ -36,7 +36,7 @@ func (h *UserLoginService) Run(req *model.UserLoginFrom) (resp *model.Result, er
 	if phone == "" || code == "" {
 		return nil, errors.New("phone or code can't be empty")
 	}
-	redisCode, err := redis.RedisClient.Get(h.Context, constants.LOGIN_CODE_KEY+phone).Result()
+	redisCode, err := redis.SlaveRedisClient.Get(h.Context, constants.LOGIN_CODE_KEY+phone).Result()
 	if err != nil {
 		hlog.CtxErrorf(h.Context, "err = %s", err.Error())
 		return nil, err
@@ -63,7 +63,7 @@ func (h *UserLoginService) Run(req *model.UserLoginFrom) (resp *model.Result, er
 
 	var userdto model.UserDTO
 	copier.Copy(&userdto, &user)
-	if err = redis.RedisClient.HMSet(h.Context, constants.LOGIN_USER_KEY+token, map[string]interface{}{
+	if err = redis.MasterRedisClient.HMSet(h.Context, constants.LOGIN_USER_KEY+token, map[string]interface{}{
 		"id":        userdto.ID,
 		"nick_name": userdto.NickName,
 		"icon":      userdto.Icon,

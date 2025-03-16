@@ -13,26 +13,50 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redsync/redsync/v4"
-	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
+	// "github.com/go-redsync/redsync/v4/redis/goredis/v8"
 )
 
 var (
-	RedisClient   *redis.Client
+	// RedisClient   *redis.Client
+    MasterRedisClient   *redis.Client
+    SlaveRedisClient   *redis.Client
 	RedsyncClient *redsync.Redsync
 )
 
 type ArgsFunc func(args ...interface{}) (interface{}, error)
 
 func Init() {
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     conf.GetConf().Redis.Address,
-		Password: conf.GetConf().Redis.Password,
-	})
-	if err := RedisClient.Ping(context.Background()).Err(); err != nil {
-		panic(err)
-	}
-	pool := goredis.NewPool(RedisClient)
-	RedsyncClient = redsync.New(pool)
+	// RedisClient = redis.NewClient(&redis.Options{
+	// 	Addr:     conf.GetConf().Redis.Address,
+	// 	Password: conf.GetConf().Redis.Password,
+	// })
+	// if err := RedisClient.Ping(context.Background()).Err(); err != nil {
+	// 	panic(err)
+	// }
+    NewRedisMasterClient();
+    NewRedisSlaveClient();
+    // pool := goredis.NewPool(RedisClient)
+	// RedsyncClient = redsync.New(pool)
+}
+
+// 主节点（写客户端）
+func NewRedisMasterClient() {
+    MasterRedisClient = redis.NewClient(&redis.Options{
+        Addr:     conf.GetConf().Redis.MasterAddress, // 主节点地址
+        Password: conf.GetConf().Redis.Password,
+        DB:       0,
+    })
+    // 添加协程池的逻辑
+}
+
+// 从节点（读客户端）
+func NewRedisSlaveClient() {
+    SlaveRedisClient = redis.NewClient(&redis.Options{
+        Addr:     conf.GetConf().Redis.SlaveAddress, // 主节点地址
+        Password: conf.GetConf().Redis.Password,
+        DB:       0,
+    })
+    // 添加协程池的逻辑
 }
 
 func SetString(ctx context.Context, key string, value interface{}, duration time.Duration) error {
@@ -40,7 +64,7 @@ func SetString(ctx context.Context, key string, value interface{}, duration time
 	if err != nil {
 		return err
 	}
-	err = RedisClient.Set(ctx, key, jsonData, duration).Err()
+	err = MasterRedisClient.Set(ctx, key, jsonData, duration).Err()
 	if err != nil {
 		return err
 	}
@@ -55,7 +79,7 @@ func SetStringLogical(ctx context.Context, key string, value interface{}, durati
 		return err
 	}
 
-	err = RedisClient.Set(ctx, key, jsonData, 0).Err()
+	err = MasterRedisClient.Set(ctx, key, jsonData, 0).Err()
 	if err != nil {
 		return err
 	}
@@ -70,7 +94,7 @@ func SetStringLogical(ctx context.Context, key string, value interface{}, durati
 func GetStringLogical(ctx context.Context, key string, duration time.Duration, dbFallback ArgsFunc, args ...interface{}) (string, error) {
     hlog.Debugf("Attempting to get shop data from Redis, key: %s", key)
 
-    redisJson, err := RedisClient.Get(ctx, key).Result()
+    redisJson, err := SlaveRedisClient.Get(ctx, key).Result()
     if err != nil {
         hlog.Errorf("Error getting data from Redis: %v", err)
     }

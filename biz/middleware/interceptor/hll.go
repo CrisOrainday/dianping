@@ -25,7 +25,7 @@ func UniqueVisitor(ctx context.Context, c *app.RequestContext) {
 	// 格式化为 YYYY-MM-DD 格式
 	today := now.Format("2006-01-02")
 	hhlVal := fmt.Sprint(userDTO.ID) + today
-	err := redis.RedisClient.PFAdd(ctx, constants.HLL_UV_KEY, hhlVal)
+	err := redis.MasterRedisClient.PFAdd(ctx, constants.HLL_UV_KEY, hhlVal)
 	if err != nil {
 		hlog.CtxErrorf(ctx, "PFAdd error: %v", err)
 	}

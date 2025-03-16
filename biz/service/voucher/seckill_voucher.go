@@ -103,7 +103,7 @@ func (h *SeckillVoucherService) Run(req *int64) (resp *int64, err error) {
     `
     
 	
-	result, err := redis.RedisClient.Eval(
+	result, err := redis.MasterRedisClient.Eval(
         h.Context,
         luaScript,
         []string{strconv.FormatInt(*req, 10)}, // KEYS

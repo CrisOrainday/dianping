@@ -40,13 +40,13 @@ func CheckToken(ctx context.Context, c *app.RequestContext) {
 		c.Next(ctx)
 	}
 	var userdto model.UserDTO
-	if err := redis.RedisClient.HGetAll(ctx, constants.LOGIN_USER_KEY+string(token)).Scan(&userdto); err != nil {
+	if err := redis.SlaveRedisClient.HGetAll(ctx, constants.LOGIN_USER_KEY+string(token)).Scan(&userdto); err != nil {
 		c.Next(ctx)
 	}
 	if userdto == (model.UserDTO{}) {
 		c.Next(ctx)
 	}
-	redis.RedisClient.Expire(ctx, constants.LOGIN_USER_KEY+string(token), time.Minute*30)
+	redis.MasterRedisClient.Expire(ctx, constants.LOGIN_USER_KEY+string(token), time.Minute*30)
 	ctx = utils.SaveUser(ctx, &userdto)
 	c.Next(ctx)
 	if utils.GetUser(ctx) == nil {

@@ -26,7 +26,7 @@ func (h *GetLikesService) Run(req *string) (resp *[]*user.UserDTO, err error) {
 	//}()
 	// todo edit your code
 	key := constants.BLOG_LIKED_KEY + *req
-	ids, err := redis.RedisClient.ZRange(h.Context, key, 0, 4).Result()
+	ids, err := redis.SlaveRedisClient.ZRange(h.Context, key, 0, 4).Result()
 	if err != nil {
 		return nil, err
 	}

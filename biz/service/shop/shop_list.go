@@ -34,7 +34,7 @@ func (h *ShopListService) Run(req *shop.Empty) (resp *[]*shop.ShopType, err erro
 	var shopTypeList []*shop.ShopType
 
 	// 从 Redis 获取数据
-	shopTypeJsonList, err := redis.RedisClient.LRange(h.Context, constants.CACHE_SHOP_TYPE_LIST_KEY, 0, -1).Result()
+	shopTypeJsonList, err := redis.SlaveRedisClient.LRange(h.Context, constants.CACHE_SHOP_TYPE_LIST_KEY, 0, -1).Result()
 	if err == nil && len(shopTypeJsonList) > 0 {
 		for _, shopTypeJson := range shopTypeJsonList {
 			var shopType shop.ShopType
@@ -63,7 +63,7 @@ func (h *ShopListService) Run(req *shop.Empty) (resp *[]*shop.ShopType, err erro
 			log.Printf("Error marshalling shop type: %v", err)
 			continue
 		}
-		redis.RedisClient.RPush(h.Context, constants.CACHE_SHOP_TYPE_LIST_KEY, shopTypeJson)
+		redis.MasterRedisClient.RPush(h.Context, constants.CACHE_SHOP_TYPE_LIST_KEY, shopTypeJson)
 	}
 
 	return &shopTypeList, nil

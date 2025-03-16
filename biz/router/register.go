@@ -8,7 +8,6 @@ import (
 	blog_comment "xzdp/biz/router/blog_comment"
 	follow "xzdp/biz/router/follow"
 	image "xzdp/biz/router/image"
-	message "xzdp/biz/router/message"
 	shop "xzdp/biz/router/shop"
 	user "xzdp/biz/router/user"
 	voucher "xzdp/biz/router/voucher"
@@ -19,8 +18,6 @@ import (
 func GeneratedRegister(r *server.Hertz) {
 	//INSERT_POINT: DO NOT DELETE THIS LINE!
 	voucher.Register(r)
-
-	message.Register(r)
 
 	blog_comment.Register(r)
 

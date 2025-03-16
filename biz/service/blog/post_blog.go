@@ -44,7 +44,7 @@ func (h *PostBlogService) Run(req *blog.Blog) (resp *blog.Blog, err error) {
 	}
 	for _, fan := range fans {
 		key := constants.FEED_KEY + strconv.FormatInt(fan.ID, 10)
-		err = redis.RedisClient.ZAdd(h.Context, key, &redis2.Z{
+		err = redis.MasterRedisClient.ZAdd(h.Context, key, &redis2.Z{
 			Score:  float64(time.Now().Unix()),
 			Member: req.ID,
 		}).Err()

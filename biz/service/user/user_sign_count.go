@@ -39,7 +39,7 @@ func (h *UserSignCountService) Run(req *user.Empty) (resp *int64, err error) {
 	key := constants.USER_SIGN_KEY + fmt.Sprint(userId) + keySuffix
 	dayOfMonth := now.Day()
 	var signCount int64 = 0
-	bitFieldResult, err := redis.RedisClient.BitField(h.Context, key, "GET", fmt.Sprintf("u%d", dayOfMonth), "0").Result()
+	bitFieldResult, err := redis.SlaveRedisClient.BitField(h.Context, key, "GET", fmt.Sprintf("u%d", dayOfMonth), "0").Result()
 	if err != nil {
 		return nil, err
 	}

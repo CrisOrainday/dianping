@@ -30,7 +30,7 @@ func (h *IsFollowedService) Run(targetUserID string) (resp *follow.IsFollowedRes
 	//获取当前用户ID
 	user := utils.GetUser(h.Context).GetID()
 	//查找是否关注
-	if !errors.Is(redis.RedisClient.SIsMember(h.Context, constants.FOLLOW_USER_KEY+strconv.FormatInt(user, 10), targetUserID).Err(), nil) {
+	if !errors.Is(redis.SlaveRedisClient.SIsMember(h.Context, constants.FOLLOW_USER_KEY+strconv.FormatInt(user, 10), targetUserID).Err(), nil) {
 		return &follow.IsFollowedResp{IsFollowed: false}, nil
 	}
 	return &follow.IsFollowedResp{IsFollowed: true}, nil

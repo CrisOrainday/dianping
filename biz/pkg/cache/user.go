@@ -17,7 +17,7 @@ import (
 func GetUserDtoFromCacheOrDB(ctx context.Context, userID int64) (*user.UserDTO, error) {
 	key := fmt.Sprintf("%s%d", constants.CACHE_USERDTO_KEY, userID)
 	// Try to get the user from cache.
-	cachedUser, err := redis.RedisClient.Get(ctx, key).Result()
+	cachedUser, err := redis.SlaveRedisClient.Get(ctx, key).Result()
 	if err != nil && !errors.Is(err, redis2.Nil) {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func GetUserDtoFromCacheOrDB(ctx context.Context, userID int64) (*user.UserDTO, 
 	if err != nil {
 		return nil, err
 	}
-	if err := redis.RedisClient.Set(ctx, key, userJSON, constants.CACHE_USERDTO_EXPIRE).Err(); err != nil {
+	if err := redis.MasterRedisClient.Set(ctx, key, userJSON, constants.CACHE_USERDTO_EXPIRE).Err(); err != nil {
 		hlog.CtxWarnf(ctx, "Failed to set user cache: %v", err)
 	}
 	dto := utils.UserToUserDTO(interUser)

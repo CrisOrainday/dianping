@@ -60,7 +60,7 @@ func queryByID1(ctx context.Context, id int64) (*shop.Shop, error) {
 	key := fmt.Sprintf("%s%d", constants.CACHE_SHOP_KEY, id)
 
 	// Query cache from Redis
-	shopJson, err := redis.RedisClient.Get(ctx, key).Result()
+	shopJson, err := redis.SlaveRedisClient.Get(ctx, key).Result()
 	if err == nil && shopJson != "" {
 		var shop shop.Shop
 		if err := json.Unmarshal([]byte(shopJson), &shop); err != nil {
@@ -77,7 +77,7 @@ func queryByID1(ctx context.Context, id int64) (*shop.Shop, error) {
 	var shop shop.Shop
 	if err := DB.First(&shop, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			redis.RedisClient.Set(ctx, key, "", constants.CACHE_NULL_TTL).Err()
+			redis.MasterRedisClient.Set(ctx, key, "", constants.CACHE_NULL_TTL).Err()
 		}
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func queryByID1(ctx context.Context, id int64) (*shop.Shop, error) {
 	if err != nil {
 		return nil, err
 	}
-	redis.RedisClient.Set(ctx, key, shopJson, constants.CACHE_SHOP_TTL).Err()
+	redis.MasterRedisClient.Set(ctx, key, shopJson, constants.CACHE_SHOP_TTL).Err()
 
 	return &shop, nil
 }
@@ -121,7 +121,7 @@ func queryByID2(ctx context.Context, id int64) (*shop.Shop, error) {
 	var shop shop.Shop
 	if err := DB.First(&shop, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			redis.RedisClient.Set(ctx, key, "", constants.CACHE_NULL_TTL).Err()
+			redis.MasterRedisClient.Set(ctx, key, "", constants.CACHE_NULL_TTL).Err()
 			return nil, err
 		}
 		return nil, err
@@ -132,7 +132,7 @@ func queryByID2(ctx context.Context, id int64) (*shop.Shop, error) {
 	if err != nil {
 		return nil, err
 	}
-	redis.RedisClient.Set(ctx, key, string(shopJson), constants.CACHE_SHOP_TTL).Err()
+	redis.MasterRedisClient.Set(ctx, key, string(shopJson), constants.CACHE_SHOP_TTL).Err()
 	return &shop, nil
 }
 
@@ -159,7 +159,7 @@ func LoadShopListToCache(ctx context.Context) error {
 			locations = append(locations, location)
 		}
 
-		_, err := redis.RedisClient.GeoAdd(ctx, key, locations...).Result()
+		_, err := redis.MasterRedisClient.GeoAdd(ctx, key, locations...).Result()
 		if err != nil {
 			return err
 		}

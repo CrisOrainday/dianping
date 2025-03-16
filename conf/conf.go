@@ -32,7 +32,8 @@ type MySQL struct {
 }
 
 type Redis struct {
-	Address  string `yaml:"address"`
+	MasterAddress  string `yaml:"master"`
+	SlaveAddress  string `yaml:"slave"`
 	Password string `yaml:"password"`
 }
 
