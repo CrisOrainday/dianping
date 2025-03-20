@@ -12,7 +12,7 @@ type Lock struct {
 	Value  string
 	Expire time.Duration
 }
-
+// 普通锁，不是分布式锁
 func NewLock(ctx context.Context, key string, value string, expire time.Duration) *Lock {
 	return &Lock{
 		Ctx:    ctx,

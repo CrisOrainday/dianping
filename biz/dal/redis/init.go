@@ -33,26 +33,24 @@ func Init() {
 	// if err := RedisClient.Ping(context.Background()).Err(); err != nil {
 	// 	panic(err)
 	// }
-    NewRedisMasterClient();
+    NewRedisClient();
     NewRedisSlaveClient();
     // pool := goredis.NewPool(RedisClient)
 	// RedsyncClient = redsync.New(pool)
 }
 
-// 主节点（写客户端）
-func NewRedisMasterClient() {
-    MasterRedisClient = redis.NewClient(&redis.Options{
-        Addr:     conf.GetConf().Redis.MasterAddress, // 主节点地址
-        Password: conf.GetConf().Redis.Password,
-        DB:       0,
+func NewRedisClient() {
+    MasterRedisClient = redis.NewFailoverClient(&redis.FailoverOptions{
+        MasterName:    "mymaster",
+        SentinelAddrs: []string{"localhost:26379", "localhost:26380", "localhost:26381"},
+        Password:      "password",
     })
-    // 添加协程池的逻辑
 }
 
 // 从节点（读客户端）
 func NewRedisSlaveClient() {
     SlaveRedisClient = redis.NewClient(&redis.Options{
-        Addr:     conf.GetConf().Redis.SlaveAddress, // 主节点地址
+        Addr:     conf.GetConf().Redis.SlaveAddress, // 从节点地址
         Password: conf.GetConf().Redis.Password,
         DB:       0,
     })

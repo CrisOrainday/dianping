@@ -16,32 +16,88 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=guest  # 默认用户
       - RABBITMQ_DEFAULT_PASS=guest  # 默认密码
-  # 主节点（Master）
+  # Redis 主节点
   redis-master:
     image: redis:latest
     container_name: redis-master
     ports:
       - 6379:6379
-    command: redis-server --requirepass password
+    command: redis-server --requirepass password --masterauth password
     networks:
       - redis-net
 
-  # 从节点（Slave）
-  redis-slave:
+  # Redis 从节点 1
+  redis-slave1:
     image: redis:latest
-    container_name: redis-slave
-    # 将宿主机的 6380 端口映射到容器的 6379 端口
+    container_name: redis-slave1
     ports:
       - 6380:6379
     command: >
       redis-server
-      --slaveof redis-master 6379
-      --masterauth password
       --requirepass password
+      --masterauth password
+      --replicaof redis-master 6379
     depends_on:
       - redis-master
     networks:
       - redis-net
+
+  # Redis 从节点 2
+  redis-slave2:
+    image: redis:latest
+    container_name: redis-slave2
+    ports:
+      - 6381:6379
+    command: >
+      redis-server
+      --requirepass password
+      --masterauth password
+      --replicaof redis-master 6379
+    depends_on:
+      - redis-master
+    networks:
+      - redis-net
+
+  # 哨兵节点 1
+  redis-sentinel1:
+    image: redis:latest
+    container_name: redis-sentinel1
+    ports:
+      - 26379:26379
+    command: >
+      redis-server /data/redis/sentinel1.conf --sentinel
+    volumes:
+      - ./sentinel_conf/sentinel1:/data/redis
+    networks:
+      - redis-net
+
+  # 哨兵节点 2
+  redis-sentinel2:
+    image: redis:latest
+    container_name: redis-sentinel2
+    ports:
+      - 26380:26379
+    command: >
+      redis-server /data/redis/sentinel2.conf --sentinel
+    volumes:
+      - ./sentinel_conf/sentinel2:/data/redis
+    networks:
+      - redis-net
+
+  # 哨兵节点 3
+  redis-sentinel3:
+    image: redis:latest
+    container_name: redis-sentinel3
+    ports:
+      - 26381:26379
+    command: >
+      redis-server /data/redis/sentinel3.conf --sentinel
+    volumes:
+      - ./sentinel_conf/sentinel3/:/data/redis
+    networks:
+      - redis-net
+
+
 
 networks:
   redis-net:
